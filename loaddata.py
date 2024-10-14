@@ -1,7 +1,7 @@
 import requests
 
 # URL с XML данными
-url = 'https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2022-Oct'
+url = 'https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2023-May'
 
 # Получаем данные по ссылке
 response = requests.get(url)
