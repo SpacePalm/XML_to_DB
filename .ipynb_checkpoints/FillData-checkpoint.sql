@@ -1,3 +1,5 @@
+DROP view if exists cve_data;
+create view cve_data as
 WITH
   vuln_remediation as (
     SELECT vulnerability_fk, 
@@ -53,6 +55,7 @@ WITH
     from vulnerability_score_set 
     group by vulnerability_fk, base_score, temporal_score
   )
+
   SELECT DISTINCT
     v.id as id,
     v.doc_xml_date as doc_xml_date,
