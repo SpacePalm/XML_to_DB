@@ -1,86 +1,21 @@
-CREATE TABLE vulnerability(
-
-id UInt64,
-doc_xml_date Nullable(String),
-cve Nullable(String),
-title Nullable(String),
-cwe Nullable(String),
-cwe_text Nullable(String)
-
-)
-ENGINE = MergeTree
-ORDER BY id;
-
-CREATE TABLE vulnerability_status(
-
-id UInt64,
-vulnerability_fk UInt64,
-status_type String,
-product_id String
-
-)
-ENGINE = MergeTree
-ORDER BY id;
-
-CREATE TABLE vulnerability_notes(
-
-id UInt64,
-vulnerability_fk UInt64,
-title  Nullable(String),
-notes_type  Nullable(String),
-note  Nullable(String)
-
-)
-ENGINE = MergeTree
-ORDER BY id;
-
-CREATE TABLE vulnerability_threats(
-
-id UInt64,
-vulnerability_fk UInt64,
-title String,
-threats_type String,
-description String,
-product_id String
-
-)
-ENGINE = MergeTree
-ORDER BY id;
-
-CREATE TABLE vulnerability_score_set(
-
-id UInt64,
-vulnerability_fk UInt64,
-base_score String,
-temporal_score String,
-vector String,
-product_id String
-
-)
-ENGINE = MergeTree
-ORDER BY id;
-
-CREATE TABLE vulnerability_revision(
-
-id UInt64,
-vulnerability_fk UInt64,
-number String,
-revision_date DateTime,
-description String
-
-)
-ENGINE = MergeTree
-ORDER BY id;
-
-CREATE TABLE vulnerability_remediation(
-
-id UInt64,
-vulnerability_fk UInt64,
-kb String,
-remediation_type String,
-url String,
-prodict_id Array(String),
-subtype String,
-fixed_build String
-
-)
+SELECT 
+    v.id AS vulnerability_id,
+    v.cve,
+    v.title AS vulnerability_title,
+    vs.status_type,
+    vn.title AS note_title,
+    vt.title AS threat_title,
+    vs.base_score,
+    vr.number AS revision_number,
+    vr.revision_date,
+    vr.description AS revision_description,
+    vr.kb AS remediation_kb,
+    vr.remediation_type
+FROM 
+    vulnerability v
+LEFT JOIN vulnerability_status vs ON v.id = vs.vulnerability_fk
+LEFT JOIN vulnerability_notes vn ON v.id = vn.vulnerability_fk
+LEFT JOIN vulnerability_threats vt ON v.id = vt.vulnerability_fk
+LEFT JOIN vulnerability_score_set vss ON v.id = vss.vulnerability_fk
+LEFT JOIN vulnerability_revision vr ON v.id = vr.vulnerability_fk
+LEFT JOIN vulnerability_remediation vrm ON v.id = vrm.vulnerability_fk
