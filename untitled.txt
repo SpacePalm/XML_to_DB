@@ -1,0 +1,86 @@
+CREATE TABLE vulnerability(
+
+id UInt64,
+doc_xml_date Nullable(String),
+cve Nullable(String),
+title Nullable(String),
+cwe Nullable(String),
+cwe_text Nullable(String)
+
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+CREATE TABLE vulnerability_status(
+
+id UInt64,
+vulnerability_fk UInt64,
+status_type String,
+product_id String
+
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+CREATE TABLE vulnerability_notes(
+
+id UInt64,
+vulnerability_fk UInt64,
+title  Nullable(String),
+notes_type  Nullable(String),
+note  Nullable(String)
+
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+CREATE TABLE vulnerability_threats(
+
+id UInt64,
+vulnerability_fk UInt64,
+title String,
+threats_type String,
+description String,
+product_id String
+
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+CREATE TABLE vulnerability_score_set(
+
+id UInt64,
+vulnerability_fk UInt64,
+base_score String,
+temporal_score String,
+vector String,
+product_id String
+
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+CREATE TABLE vulnerability_revision(
+
+id UInt64,
+vulnerability_fk UInt64,
+number String,
+revision_date DateTime,
+description String
+
+)
+ENGINE = MergeTree
+ORDER BY id;
+
+CREATE TABLE vulnerability_remediation(
+
+id UInt64,
+vulnerability_fk UInt64,
+kb String,
+remediation_type String,
+url String,
+prodict_id Array(String),
+subtype String,
+fixed_build String
+
+)
