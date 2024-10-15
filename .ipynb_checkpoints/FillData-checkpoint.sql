@@ -1,9 +1,16 @@
 WITH
   vuln_remediation as (
-    SELECT vulnerability_fk, arrayDistinct(groupArray(kb)) as kb FROM vulnerability_remediation GROUP BY vulnerability_fk
+    SELECT vulnerability_fk, 
+    arrayDistinct(groupArray(kb)) as kb 
+    FROM vulnerability_remediation 
+    GROUP BY vulnerability_fk
   ),
   vuln_threats as (
-    SELECT vulnerability_fk, arrayDistinct(groupArray(threats_type)) as threats_type, arrayDistinct(groupArray(description)) as description FROM vulnerability_threats GROUP BY vulnerability_fk
+    SELECT vulnerability_fk, 
+    arrayDistinct(groupArray(threats_type)) as threats_type, 
+    arrayDistinct(groupArray(description)) as description 
+    FROM vulnerability_threats 
+    GROUP BY vulnerability_fk
   ),
   max_revision as (
     select
@@ -21,8 +28,31 @@ WITH
       t1.description as description
     FROM vulnerability_revision as t1
     RIGHT JOIN max_revision as mr ON t1.revision_date = mr.revision_date and toFloat32(t1.number) = mr.number and t1.vulnerability_fk = mr.vulnerability_fk
+  ),
+  vlun_notes as (
+    select 
+    vulnerability_fk,
+    arrayDistinct(groupArray(note)) as note
+    from vulnerability_notes 
+    group by vulnerability_fk
+  ),
+    vlun_status as (
+    select 
+    vulnerability_fk,
+    status_type,
+    arrayDistinct(groupArray(product_id)) as product_id
+    from vulnerability_status 
+    group by status_type, vulnerability_fk
+  ),
+    vlun_ss as (
+    select 
+    vulnerability_fk,
+    base_score,
+    temporal_score,
+    arrayDistinct(groupArray(product_id)) as product_id
+    from vulnerability_score_set 
+    group by vulnerability_fk, base_score, temporal_score
   )
-  
   SELECT DISTINCT
     v.id as id,
     v.doc_xml_date as doc_xml_date,
@@ -32,14 +62,12 @@ WITH
     v.cwe_text as cwe_text,
     vs.status_type as status_type,
     vs.product_id as status_product_id,
-    vn.title as notes_title,
-    vn.notes_type as notes_type,
     vn.note as note,
     vt.threats_type as threats_type,
     vt.description as treat_description,
     vss.base_score as base_score,
     vss.temporal_score as temporal_score,
-    vss.vector as vector,
+    vss.product_id as product_id,
     vrv.number as rev_number,
     vrv.revision_date as rev_date,
     vrv.description as rev_description,
@@ -67,10 +95,10 @@ WITH
     di.sch as doc_sch,
     di.cvrf as doc_cvrf
 FROM vulnerability as v
-left join vulnerability_status as vs on v.id = vs.vulnerability_fk
-left join vulnerability_notes as vn on v.id = vn.vulnerability_fk
+left join vlun_status as vs on v.id = vs.vulnerability_fk
+left join vlun_notes as vn on v.id = vn.vulnerability_fk
 left join vuln_threats as vt on v.id = vt.vulnerability_fk
-left join vulnerability_score_set  as vss on v.id = vss.vulnerability_fk
+left join vlun_ss  as vss on v.id = vss.vulnerability_fk
 left join vuln_revision  as vrv on v.id = vrv.vulnerability_fk
 left join vuln_remediation  as vrm on v.id = vrm.vulnerability_fk
 left join document_info as di on v.doc_xml_date = di.id
