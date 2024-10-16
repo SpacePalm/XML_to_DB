@@ -147,7 +147,8 @@ as
 WITH
   vuln_remediation as (
     SELECT vulnerability_fk, 
-    arrayDistinct(groupArray(kb)) as kb 
+    arrayDistinct(groupArray(kb)) as kb,
+    arrayDistinct(groupArray(fixed_build)) as fixed_build 
     FROM vulnerability_remediation 
     GROUP BY vulnerability_fk
   ),
@@ -219,6 +220,7 @@ WITH
     vrv.number as rev_number,
     vrv.revision_date as rev_date,
     vrv.description as rev_description,
+    vrm.fixed_build as fixed_build,
     vrm.kb as kb,
     di.status as doc_status,
     di.version as doc_version,
@@ -258,7 +260,8 @@ create materialized view if not exists mv_cve_data to cve_data
 WITH
   vuln_remediation as (
     SELECT vulnerability_fk, 
-    arrayDistinct(groupArray(kb)) as kb 
+    arrayDistinct(groupArray(kb)) as kb,
+    arrayDistinct(groupArray(fixed_build)) as fixed_build 
     FROM vulnerability_remediation 
     GROUP BY vulnerability_fk
   ),
@@ -331,6 +334,7 @@ WITH
     vrv.revision_date as rev_date,
     vrv.description as rev_description,
     vrm.kb as kb,
+    vrm.fixed_build as fixed_build,
     di.status as doc_status,
     di.version as doc_version,
     di.revision_history_number as doc_revision_history_number,
