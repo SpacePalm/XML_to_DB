@@ -203,7 +203,6 @@ WITH
 
   SELECT DISTINCT
     now() as timestamp,
-    v.id as id,
     v.doc_xml_date as doc_xml_date,
     v.cve as cve,
     v.title as vul_title,
@@ -316,7 +315,6 @@ WITH
 
   SELECT DISTINCT
     now() as timestamp,
-    v.id as id,
     v.doc_xml_date as doc_xml_date,
     v.cve as cve,
     v.title as vul_title,
