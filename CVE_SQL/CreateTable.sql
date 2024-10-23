@@ -17,7 +17,7 @@ CREATE TABLE if not exists vulnerability_status(
 id UInt64,
 vulnerability_fk UInt64,
 status_type String,
-product_id String
+product_id  Nullable(String)
 
 )
 ENGINE = MergeTree
@@ -42,7 +42,7 @@ vulnerability_fk UInt64,
 title String,
 threats_type String,
 description String,
-product_id String
+product_id  Nullable(String)
 
 )
 ENGINE = MergeTree
@@ -55,7 +55,7 @@ vulnerability_fk UInt64,
 base_score String,
 temporal_score String,
 vector String,
-product_id String
+product_id  Nullable(String)
 
 )
 ENGINE = MergeTree
