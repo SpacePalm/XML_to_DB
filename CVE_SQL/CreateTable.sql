@@ -14,18 +14,16 @@ ORDER BY id;
 
 CREATE TABLE if not exists vulnerability_status(
 
-id UInt64,
 vulnerability_fk UInt64,
 status_type String,
 product_id  Nullable(String)
 
 )
 ENGINE = MergeTree
-ORDER BY id;
+ORDER BY vulnerability_fk;
 
 CREATE TABLE if not exists vulnerability_notes(
 
-id UInt64,
 vulnerability_fk UInt64,
 title  Nullable(String),
 notes_type  Nullable(String),
@@ -33,11 +31,10 @@ note  Nullable(String)
 
 )
 ENGINE = MergeTree
-ORDER BY id;
+ORDER BY vulnerability_fk;
 
 CREATE TABLE if not exists vulnerability_threats(
 
-id UInt64,
 vulnerability_fk UInt64,
 title String,
 threats_type String,
@@ -46,11 +43,10 @@ product_id  Nullable(String)
 
 )
 ENGINE = MergeTree
-ORDER BY id;
+ORDER BY vulnerability_fk;
 
 CREATE TABLE if not exists vulnerability_score_set(
 
-id UInt64,
 vulnerability_fk UInt64,
 base_score String,
 temporal_score String,
@@ -59,11 +55,10 @@ product_id  Nullable(String)
 
 )
 ENGINE = MergeTree
-ORDER BY id;
+ORDER BY vulnerability_fk;
 
 CREATE TABLE if not exists vulnerability_revision(
 
-id UInt64,
 vulnerability_fk UInt64,
 number String,
 revision_date DateTime,
@@ -71,11 +66,10 @@ description String
 
 )
 ENGINE = MergeTree
-ORDER BY id;
+ORDER BY vulnerability_fk;
 
 CREATE TABLE if not exists vulnerability_remediation(
 
-id UInt64,
 vulnerability_fk UInt64,
 kb String,
 remediation_type String,
@@ -86,7 +80,7 @@ fixed_build String
 
 )
 ENGINE = MergeTree
-ORDER BY id;
+ORDER BY vulnerability_fk;
 
 CREATE TABLE if not exists product(
 
