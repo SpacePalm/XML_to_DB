@@ -61,7 +61,7 @@ CREATE TABLE if not exists vulnerability_revision(
 
 vulnerability_fk UInt64,
 number String,
-revision_date DateTime,
+revision_date String,
 description String
 
 )
