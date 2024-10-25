@@ -15,6 +15,12 @@ import json
 project_path = '/opt/airflow/dags/CVE_SQL/'
 db_hook = BaseHook.get_connection('Clickhouse')
 connection = clickhouse_connect.get_client(host = db_hook.host, port = 8123, username = db_hook.login, password = db_hook.password, database = db_hook.schema)
+proxy_hook = BaseHook.get_connection('proxy')
+proxies = {
+    'http': f'{proxy_hook.schema}{proxy_hook.login}:{proxy_hook.password}@{proxy_hook.host}:{proxy_hook.port}',
+    'https': f'{proxy_hook.schema}{proxy_hook.login}:{proxy_hook.password}@{proxy_hook.host}:{proxy_hook.port}'
+    
+}
 
 
 def setup_data():
@@ -59,12 +65,7 @@ def get_load_data(today_m = date.today().month, today_y = date.today().year):
                 
     soup = ""
     url = f'https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/{today_y}-{doc_month_array[today_m]}'
-    proxy_hook = BaseHook.get_connection('proxy')
-    proxies = {
-        'http': f'{proxy_hook.schema}{proxy_hook.login}:{proxy_hook.password}@{proxy_hook.host}:{proxy_hook.port}',
-        'https': f'{proxy_hook.schema}{proxy_hook.login}:{proxy_hook.password}@{proxy_hook.host}:{proxy_hook.port}'
-        
-    }
+
     # Получаем данные по ссылке
     response = requests.get(url, proxies = proxies)
     

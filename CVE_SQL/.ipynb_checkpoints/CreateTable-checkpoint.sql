@@ -348,29 +348,31 @@ with
     left join product on product.id = ids.id
 
 
-  )
-  
-
-  SELECT DISTINCT 
-  now() as timestamp,
-    doc_xml_date as doc_xml_date,
-    doc_initial_relise_date as doc_initial_relise_date,
-    cve as cve,
-    base_score as base_score,
-    temporal_score as temporal_score,
-    product_names.kb as kb,
-    product_names.product_id as kb_product_ids,
-    product_names.product_name as product_names,
-    cwe as cwe,
-    vul_title as vul_title,
-    product_names.fixed_build as fixed_build,
-    doc_document_title as doc_document_title
-
+  ),
+    filtered_data as (
+      SELECT DISTINCT 
+      now() as timestamp,
+        doc_xml_date as doc_xml_date,
+        doc_initial_relise_date as doc_initial_relise_date,
+        cve as cve,
+        base_score as base_score,
+        temporal_score as temporal_score,
+        product_names.kb as kb,
+        product_names.product_id as kb_product_id,
+        product_names.product_name as product_names,
+        cwe as cwe,
+        vul_title as vul_title,
+        product_names.fixed_build as fixed_build,
+        doc_document_title as doc_document_title,
+        row_number() over (partition by cve, doc_xml_date, kb, kb_product_id, product_names order by fixed_build desc) as rn
+        
+    FROM cve_data
     
-FROM cve_data
-
-left join product_names on product_names.kb = cve_data.kb 
-where kb != '';
+    left join product_names on product_names.kb = cve_data.kb 
+    where kb != ''
+)
+select timestamp, doc_xml_date, doc_initial_relise_date, cve, base_score, temporal_score, kb, kb_product_id,  product_names, cwe, vul_title, fixed_build, doc_document_title,  from filtered_data
+where rn = 1;
 
     
 create materialized view if not exists mv_msrc_data to msrc_data as
@@ -386,27 +388,28 @@ with
     left join product on product.id = ids.id
 
 
-  )
-  
-
-  SELECT DISTINCT 
-  now() as timestamp,
-    doc_xml_date as doc_xml_date,
-    doc_initial_relise_date as doc_initial_relise_date,
-    cve as cve,
-    base_score as base_score,
-    temporal_score as temporal_score,
-    product_names.kb as kb,
-    product_names.product_id as kb_product_ids,
-    product_names.product_name as product_names,
-    cwe as cwe,
-    vul_title as vul_title,
-    product_names.fixed_build as fixed_build,
-    doc_document_title as doc_document_title
-
+  ),
+    filtered_data as (
+      SELECT DISTINCT 
+      now() as timestamp,
+        doc_xml_date as doc_xml_date,
+        doc_initial_relise_date as doc_initial_relise_date,
+        cve as cve,
+        base_score as base_score,
+        temporal_score as temporal_score,
+        product_names.kb as kb,
+        product_names.product_id as kb_product_id,
+        product_names.product_name as product_names,
+        cwe as cwe,
+        vul_title as vul_title,
+        product_names.fixed_build as fixed_build,
+        doc_document_title as doc_document_title,
+        row_number() over (partition by cve, doc_xml_date, kb, kb_product_id, product_names order by fixed_build desc) as rn
+        
+    FROM cve_data
     
-FROM cve_data
-
-left join product_names on product_names.kb = cve_data.kb 
-where kb != ''
-
+    left join product_names on product_names.kb = cve_data.kb 
+    where kb != ''
+)
+select timestamp, doc_xml_date, doc_initial_relise_date, cve, base_score, temporal_score, kb, kb_product_id,  product_names, cwe, vul_title, fixed_build, doc_document_title,  from filtered_data
+where rn = 1
