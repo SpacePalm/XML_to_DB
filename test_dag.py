@@ -97,7 +97,9 @@ def get_load_data(today_m = date.today().month, today_y = date.today().year):
             if 'Type' not in node.attrs and node.name != 'ProductTree':
                 if 'Type' in node.parent.attrs:
                     productdb['productdbType'].append(node.parent.attrs['Type'])
-                    productdb['productdbName'].append(node.parent.attrs['Name'])
+                    if(node.parent.attrs['Name'] in ['Windows Server 2008 R2 for x64-based Systems Service Pack 1 (Server Core installation)', 'Windows Server 2008 R2 for x64-based Systems Service Pack 1', 'Windows Server 2008 for 32-bit Systems Service Pack 2 (Server Core installation)']
+                        productdb['productdbName'].append('Windows Server 2008')
+                    elif(node.parent.attrs['Name'] in ['Windows Server 2012 (Server Core installation)', 'Windows Server 2012 R2', 'Windows Server 2012 R2 (Server Core installation)'])
                 else:
                     productdb['productdbType'].append('')
                     productdb['productdbName'].append('')

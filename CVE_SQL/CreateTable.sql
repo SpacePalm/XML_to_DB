@@ -89,7 +89,7 @@ product_name String,
 product_type String
 
 )
-ENGINE = MergeTree
+ENGINE = ReplacingMergeTree
 ORDER BY id;
 
 CREATE TABLE if not exists document_info(
