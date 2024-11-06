@@ -412,4 +412,19 @@ with
     where kb != ''
 )
 select timestamp, doc_xml_date, doc_initial_relise_date, cve, base_score, temporal_score, kb, kb_product_id,  product_names, cwe, vul_title, fixed_build, doc_document_title,  from filtered_data
-where rn = 1
+where rn = 1;
+
+
+create table if not exists host_rec_kb (
+timestamp DateTime DEFAULT now(),
+hostname String,
+os_name String,
+os_version String,
+last_kb String,
+last_kb_date String,
+last_update_date String,
+rec_kb_arr Array(Array(String)),
+cve String
+)
+ENGINE = MergeTree
+order by hostname
