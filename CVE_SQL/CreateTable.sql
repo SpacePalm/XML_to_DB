@@ -415,7 +415,7 @@ select timestamp, doc_xml_date, doc_initial_relise_date, cve, base_score, tempor
 where rn = 1;
 
 
-create table if not exists host_rec_kb (
+create table if not exists dwh_osquery_hosts_kb (
 timestamp DateTime DEFAULT now(),
 hostname String,
 os_name String,
@@ -426,5 +426,43 @@ last_update_date String,
 rec_kb_arr Array(Array(String)),
 cve String
 )
-ENGINE = MergeTree
-order by hostname
+ENGINE = ReplacingMergeTree
+order by (hostname, cve, last_kb, last_kb_date);
+
+
+create table if not exists dict_osquery_hosts_kb
+ENGINE = ReplacingMergeTree
+order by (hostname, cve)
+
+AS
+select DISTINCT
+timestamp as timestamp,
+hostname as hostname,
+os_name as os_name,
+os_version as os_version,
+last_kb as last_kb,
+last_kb_date as last_kb_date,
+last_update_date as last_update_date,
+rec_kb_arr as rec_kb_arr,
+cve as cve
+
+from dwh_osquery_hosts_kb;
+
+
+
+CREATE materialized view if not exists mv_dict_osquery_hosts_kb to dict_osquery_hosts_kb
+AS
+select DISTINCT
+timestamp as timestamp,
+hostname as hostname,
+os_name as os_name,
+os_version as os_version,
+last_kb as last_kb,
+last_kb_date as last_kb_date,
+last_update_date as last_update_date,
+rec_kb_arr as rec_kb_arr,
+cve as cve
+
+from dwh_osquery_hosts_kb
+
+
