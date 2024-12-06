@@ -1,16 +1,14 @@
 import os
-import nbformat
 from pathlib import Path
-from ipywidgets import Tab, VBox, Button, Output
-from nbconvert.preprocessors import ExecutePreprocessor
-from IPython.display import display, HTML
+from ipywidgets import Tab, VBox, Button, Output, IFrame
+from IPython.display import display
 
 class DynamicNotebookPortal:
     def __init__(self, base_dir):
         self.base_dir = Path(base_dir)
         self.tab = Tab()
         self.folders = {}
-        self.output_area = Output()  # Общая область вывода
+        self.output_area = Output()  # Общая область вывода для отладки или сообщений
         self.update_tabs()
         
     def update_tabs(self):
@@ -41,30 +39,24 @@ class DynamicNotebookPortal:
         """Создает содержимое для вкладки."""
         items = []
         for file in folder.glob("*.ipynb"):
-            btn = Button(description=f"Run {file.name}")
-            btn.on_click(lambda _, path=file: self.run_notebook(path))
+            btn = Button(description=f"Open {file.name}")
+            btn.on_click(lambda _, path=file: self.display_notebook_in_iframe(path))
             items.append(btn)
         return VBox(items)
     
-    def run_notebook(self, notebook_path):
-        """Выполняет Jupyter Notebook и отображает результат."""
+    def display_notebook_in_iframe(self, notebook_path):
+        """Отображает Jupyter Notebook в IFrame."""
         with self.output_area:
-            self.output_area.clear_output()  # Очищаем предыдущий вывод
+            self.output_area.clear_output()
             try:
-                # Читаем файл .ipynb
-                with open(notebook_path, "r", encoding="utf-8") as f:
-                    nb = nbformat.read(f, as_version=4)
-                
-                # Выполняем блокнот
-                ep = ExecutePreprocessor(timeout=600, kernel_name='python3')
-                ep.preprocess(nb, {'metadata': {'path': str(notebook_path.parent)}})
-                
-                # Преобразуем в HTML
-                html_content = "".join(cell.get("outputs", "") for cell in nb.cells if "outputs" in cell)
-                display(HTML(html_content))
+                # Формируем URL для блокнота
+                relative_path = notebook_path.relative_to(self.base_dir)
+                iframe_url = f"/notebooks/{relative_path}"  # Убедитесь, что сервер Jupyter позволяет доступ к файлам
+                iframe = IFrame(src=iframe_url, width="100%", height="600px")
+                display(iframe)
             except Exception as e:
-                print(f"Ошибка при выполнении {notebook_path}: {e}")
-
+                print(f"Ошибка при отображении {notebook_path}: {e}")
+    
 def display_portal(base_dir=""):
     """Функция для отображения портала."""
     portal = DynamicNotebookPortal(base_dir)
@@ -72,4 +64,4 @@ def display_portal(base_dir=""):
     display(portal.output_area)  # Общий вывод
 
 # Вызываем функцию отображения
-display_portal("")
+display_portal("path/to/your/folder")
