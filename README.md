@@ -1,7 +1,9 @@
-import importlib.util
+import nbformat
 from pathlib import Path
-from ipywidgets import Tab, Output, VBox
+from ipywidgets import Tab, VBox, Output
 from IPython.display import display
+import importlib.util
+import sys
 
 class DynamicInterfacePortal:
     def __init__(self, base_dir):
@@ -38,23 +40,33 @@ class DynamicInterfacePortal:
         """Создает содержимое для вкладки."""
         items = []
         for file in folder.glob("*.ipynb"):
-            # Попытка загрузить интерфейс из файла
-            interface = self.load_interface(file)
+            interface = self.load_notebook_interface(file)
             if interface:
                 items.append(interface)
         return VBox(items) if items else VBox([Output(value=f"No interfaces found in {folder.name}")])
     
-    def load_interface(self, file_path):
-        """Загружает интерфейс из файла как модуль."""
+    def load_notebook_interface(self, notebook_path):
+        """Загружает интерфейс из Jupyter Notebook."""
         with self.output_area:
             try:
-                spec = importlib.util.spec_from_file_location(file_path.stem, file_path)
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                # Ожидается, что в модуле будет функция create_interface()
-                return module.create_interface()
+                # Открываем .ipynb файл и исполняем код
+                with open(notebook_path, "r", encoding="utf-8") as f:
+                    notebook = nbformat.read(f, as_version=4)
+                
+                # Выполняем код ячеек
+                local_env = {}
+                for cell in notebook.cells:
+                    if cell.cell_type == "code":
+                        exec(cell.source, globals(), local_env)
+                
+                # Ожидаем функцию create_interface
+                if "create_interface" in local_env:
+                    return local_env["create_interface"]()
+                else:
+                    print(f"Функция create_interface не найдена в {notebook_path}")
+                    return None
             except Exception as e:
-                print(f"Ошибка при загрузке интерфейса из {file_path}: {e}")
+                print(f"Ошибка при загрузке интерфейса из {notebook_path}: {e}")
                 return None
 
 def display_portal(base_dir=""):
