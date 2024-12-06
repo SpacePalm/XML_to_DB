@@ -1,8 +1,8 @@
 import os
 import nbformat
 from pathlib import Path
-from ipywidgets import Tab, VBox, Button, Output, Label
-from nbconvert import HTMLExporter
+from ipywidgets import Tab, VBox, Button, Output
+from nbconvert.preprocessors import ExecutePreprocessor
 from IPython.display import display, HTML
 
 class DynamicNotebookPortal:
@@ -47,19 +47,21 @@ class DynamicNotebookPortal:
         return VBox(items)
     
     def run_notebook(self, notebook_path):
-        """Запускает Jupyter Notebook и обновляет общий вывод."""
+        """Выполняет Jupyter Notebook и отображает результат."""
         with self.output_area:
             self.output_area.clear_output()  # Очищаем предыдущий вывод
             try:
                 # Читаем файл .ipynb
                 with open(notebook_path, "r", encoding="utf-8") as f:
                     nb = nbformat.read(f, as_version=4)
-
-                # Преобразуем в HTML для отображения
-                html_exporter = HTMLExporter()
-                html_exporter.exclude_input = True  # Показывать код
-                body, _ = html_exporter.from_notebook_node(nb)
-                display(HTML(body))
+                
+                # Выполняем блокнот
+                ep = ExecutePreprocessor(timeout=600, kernel_name='python3')
+                ep.preprocess(nb, {'metadata': {'path': str(notebook_path.parent)}})
+                
+                # Преобразуем в HTML
+                html_content = "".join(cell.get("outputs", "") for cell in nb.cells if "outputs" in cell)
+                display(HTML(html_content))
             except Exception as e:
                 print(f"Ошибка при выполнении {notebook_path}: {e}")
 
